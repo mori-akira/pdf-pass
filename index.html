@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Password Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>PDF パスワード付与/解除ツール</h1>
+      <p>
+        ブラウザ上で完結する安全な PDF セキュリティ管理アプリです。PDF は
+        サーバーへ送信されません。
+      </p>
+    </header>
+
+    <main class="app-main">
+      <section class="card" aria-labelledby="protect-title">
+        <h2 id="protect-title">PDF にパスワードを付与する</h2>
+        <p class="description">
+          PDF ファイルを選択し、設定したいパスワードを入力してください。
+        </p>
+        <form id="protect-form">
+          <label class="input-group">
+            <span>PDF ファイル</span>
+            <input type="file" id="protect-file" accept="application/pdf" required />
+          </label>
+          <label class="input-group">
+            <span>パスワード</span>
+            <input
+              type="password"
+              id="protect-password"
+              placeholder="8文字以上を推奨"
+              required
+            />
+          </label>
+          <label class="input-group">
+            <span>パスワード（確認）</span>
+            <input type="password" id="protect-password-confirm" required />
+          </label>
+          <button type="submit" class="primary-button">パスワードを付与</button>
+          <p class="message" id="protect-message" role="status"></p>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="unlock-title">
+        <h2 id="unlock-title">PDF のパスワードを解除する</h2>
+        <p class="description">
+          パスワード付き PDF と解除用のパスワードを入力してください。
+        </p>
+        <form id="unlock-form">
+          <label class="input-group">
+            <span>パスワード付き PDF ファイル</span>
+            <input type="file" id="unlock-file" accept="application/pdf" required />
+          </label>
+          <label class="input-group">
+            <span>現在のパスワード</span>
+            <input type="password" id="unlock-password" required />
+          </label>
+          <button type="submit" class="primary-button">パスワードを解除</button>
+          <p class="message" id="unlock-message" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>
+        作成したファイルはローカルでのみ処理され、サーバーへアップロードされません。
+        安全な環境でご利用ください。
+      </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="script.js" defer></script>
+  </body>
+</html>
