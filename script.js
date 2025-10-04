@@ -141,25 +141,10 @@ unlockForm.addEventListener('submit', async (event) => {
   try {
     setLoadingState(unlockForm, true);
     const arrayBuffer = await readFileAsArrayBuffer(file);
-
-    let pdfDoc;
-    try {
-      pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, {
-        password,
-      });
-    } catch (loadError) {
-      if (
-        loadError?.message?.includes('Input document') &&
-        loadError?.message?.includes('encrypted')
-      ) {
-        pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, {
-          password,
-          ignoreEncryption: true,
-        });
-      } else {
-        throw loadError;
-      }
-    }
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, {
+      password,
+      ignoreEncryption: false,
+    });
 
     const newPdf = await PDFLib.PDFDocument.create();
     const copiedPages = await newPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
@@ -174,8 +159,6 @@ unlockForm.addEventListener('submit', async (event) => {
     console.error(error);
     const message = error?.message?.includes('Invalid password')
       ? 'パスワードが正しいか確認してください。'
-      : error?.message?.includes('encrypted')
-      ? 'PDF の暗号方式に対応していない可能性があります。別のツールで再保存してからお試しください。'
       : 'パスワードの解除に失敗しました。PDF が破損していないか確認してください。';
     showMessage(unlockMessage, message, 'error');
   } finally {
