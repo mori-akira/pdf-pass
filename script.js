@@ -22,13 +22,37 @@ function showMessage(target, message, type = 'info') {
   }
 }
 
-function readFileAsArrayBuffer(file) {
+function readFileAsUint8Array(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
+    reader.onload = () => {
+      try {
+        const result = reader.result;
+        if (!(result instanceof ArrayBuffer)) {
+          throw new Error('ファイルの読み込み結果が不正です。');
+        }
+        resolve(new Uint8Array(result));
+      } catch (error) {
+        reject(error);
+      }
+    };
     reader.onerror = () => reject(new Error('ファイルの読み込みに失敗しました。'));
     reader.readAsArrayBuffer(file);
   });
+}
+
+async function loadPdf(bytes, options) {
+  try {
+    return await PDFLib.PDFDocument.load(bytes, options);
+  } catch (error) {
+    if (options?.password && error?.message?.includes('Input document to `PDFDocument.load` is encrypted')) {
+      return PDFLib.PDFDocument.load(bytes, {
+        ...options,
+        ignoreEncryption: true,
+      });
+    }
+    throw error;
+  }
 }
 
 function createDownload(bytes, filename) {
@@ -85,8 +109,8 @@ protectForm.addEventListener('submit', async (event) => {
 
   try {
     setLoadingState(protectForm, true);
-    const arrayBuffer = await readFileAsArrayBuffer(file);
-    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, {
+    const fileBytes = await readFileAsUint8Array(file);
+    const pdfDoc = await PDFLib.PDFDocument.load(fileBytes, {
       ignoreEncryption: false,
     });
 
@@ -140,11 +164,8 @@ unlockForm.addEventListener('submit', async (event) => {
 
   try {
     setLoadingState(unlockForm, true);
-    const arrayBuffer = await readFileAsArrayBuffer(file);
-    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, {
-      password,
-      ignoreEncryption: false,
-    });
+    const fileBytes = await readFileAsUint8Array(file);
+    const pdfDoc = await loadPdf(fileBytes, { password, ignoreEncryption: false });
 
     const newPdf = await PDFLib.PDFDocument.create();
     const copiedPages = await newPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
